@@ -1,14 +1,47 @@
 #include "MainWindow.h"
 #include "Graphics.h"
+#include <fstream>
+#include <string>
 
-int iWidth = 1066;
-int iHeight = 600;
+int iWidth = 720;
+int iHeight = 720;
 LPCTSTR sWndClassName = L"normalWindow";
 HWND hHwnd = NULL;
 MSG mMsg;
 
 bool InitMainWindow(HINSTANCE hInstance, int nCmdShow, bool windowed)
 {
+	//Read (Global) Variables from 'preferences.ini'
+	std::ifstream prefFile ("preferences.ini", std::ios::in);
+	std::string line;
+	
+	if (prefFile.is_open())
+	{
+		while (std::getline(prefFile, line))
+		{
+			if (line.find("cWidth") >= 0)
+			{
+				iWidth = stoi(line.substr(line.find(" ") + 1, line.length()));
+			}
+
+			else if (line.find("cHeight") >= 0)
+			{
+				iHeight = stoi(line.substr(line.find(" ") + 1, line.length()));
+			}
+		}
+		prefFile.close();
+	}
+
+	else
+	{
+		std::ofstream prefFile;
+		prefFile.open("preferences.ini");
+		prefFile << "cWidth: 720" << std::endl;
+		prefFile << "cHeight: 720";
+		prefFile.close();
+	}
+
+
 	//Windows Klasse erstellen
 	WNDCLASSEX wc;
 	ZeroMemory(&wc, sizeof(WNDCLASSEX));
@@ -77,12 +110,21 @@ void messageLoop(Graphics& graphics)
 			TranslateMessage(&mMsg);
 			DispatchMessage(&mMsg);
 		}
-
+ 
 		//Run Game Code
 		else
 		{
-			graphics.drawScene();
-			graphics.updateScene();
+			static float rot = 0.0f;
+			graphics.moveLight(rot);
+			graphics.startDraw();
+			graphics.setCube('1');
+			graphics.setCBuffer(rot, '1');
+			graphics.drawCube();
+			graphics.setCube('2');
+			graphics.setCBuffer(rot, '2');
+			graphics.drawCube();
+			graphics.endDraw();
+			rot += 0.01;
 		}
 	}
 }
@@ -93,9 +135,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
 	case WM_KEYDOWN:
 		if (wParam == VK_ESCAPE) {
-			if (MessageBox(0, L"Are you sure you want to exit?",
-				L"Really?", MB_YESNO | MB_ICONQUESTION) == IDYES)
-				DestroyWindow(hwnd);
+			DestroyWindow(hwnd);
 		}
 		return 0;
 
