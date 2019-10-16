@@ -1,12 +1,13 @@
 #pragma once
 #include <d3d11.h>
+#include <DirectXMath.h>
+#include <dxgidebug.h>
 #pragma comment(lib, "d3d11.lib")
 
 class Graphics
 {
 public:
 	Graphics(HWND hwnd, int width, int height, bool windowed);
-	~Graphics();
 	void initScene();
 	void initTriangle(float size, float screenRatio);
 	void initCube(char bufferNumber);
@@ -18,8 +19,11 @@ public:
 	void setCube(char number);
 	void setCBuffer(float rotation, char number);
 	void moveLight(float xTransform);
+	void debugReportLiveObject();
+	void cleanUp();
 
 private:
+	ID3D11Debug* debug;
 	IDXGISwapChain* pSwapChain = nullptr;
 	ID3D11Device* pDevice = nullptr;
 	ID3D11DeviceContext* pContext = nullptr;

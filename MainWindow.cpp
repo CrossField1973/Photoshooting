@@ -127,6 +127,8 @@ void messageLoop(Graphics& graphics)
 			rot += 0.0001;
 		}
 	}
+	graphics.cleanUp();
+	graphics.debugReportLiveObject();
 }
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)

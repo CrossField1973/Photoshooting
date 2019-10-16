@@ -1,5 +1,4 @@
 #include "Graphics.h"
-#include <DirectXMath.h>
 #include <d3dcompiler.h>
 #include <cassert>
 #include <vector>
@@ -8,9 +7,6 @@
 
 extern int iHeight;
 extern int iWidth;
-
-//The vertex Structure
-
 
 Graphics::Graphics(HWND hwnd, int width, int height, bool windowed)
 {
@@ -92,7 +88,7 @@ Graphics::Graphics(HWND hwnd, int width, int height, bool windowed)
 	pContext->OMSetRenderTargets(1, &pRenderTargetView, depthStencilView);
 }
 
-Graphics::~Graphics()
+void Graphics::cleanUp()
 {
 	if (pSwapChain)
 	{
@@ -468,4 +464,11 @@ void Graphics::moveLight(float xTransform)
 	pDevice->CreateBuffer(&cbDesc, &cbData, &cbL);
 	pContext->PSSetConstantBuffers(0, 1, &cbL);
 	cbL->Release();
+}
+
+void Graphics::debugReportLiveObject()
+{
+	pDevice->QueryInterface(IID_PPV_ARGS(&debug));
+	debug->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
+	debug->Release();
 }
