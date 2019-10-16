@@ -3,8 +3,8 @@
 #include <fstream>
 #include <string>
 
-int iWidth = 720;
-int iHeight = 720;
+int iWidth = 2520;
+int iHeight = 1080;
 LPCTSTR sWndClassName = L"normalWindow";
 HWND hHwnd = NULL;
 MSG mMsg;
@@ -19,12 +19,12 @@ bool InitMainWindow(HINSTANCE hInstance, int nCmdShow, bool windowed)
 	{
 		while (std::getline(prefFile, line))
 		{
-			if (line.find("cWidth") >= 0)
+			if (line.find("cWidth") != std::string::npos)
 			{
 				iWidth = stoi(line.substr(line.find(" ") + 1, line.length()));
 			}
 
-			else if (line.find("cHeight") >= 0)
+			else if (line.find("cHeight") != std::string::npos)
 			{
 				iHeight = stoi(line.substr(line.find(" ") + 1, line.length()));
 			}
@@ -36,8 +36,8 @@ bool InitMainWindow(HINSTANCE hInstance, int nCmdShow, bool windowed)
 	{
 		std::ofstream prefFile;
 		prefFile.open("preferences.ini");
-		prefFile << "cWidth: 720" << std::endl;
-		prefFile << "cHeight: 720";
+		prefFile << "cWidth: " << iWidth << std::endl;
+		prefFile << "cHeight: " << iHeight << std::endl;
 		prefFile.close();
 	}
 
@@ -124,7 +124,7 @@ void messageLoop(Graphics& graphics)
 			graphics.setCBuffer(rot, '2');
 			graphics.drawCube();
 			graphics.endDraw();
-			rot += 0.01;
+			rot += 0.0001;
 		}
 	}
 }

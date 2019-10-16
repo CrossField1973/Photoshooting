@@ -6,14 +6,11 @@
 
 #pragma comment(lib, "D3DCompiler.lib")
 
-namespace wrl = Microsoft::WRL;
+extern int iHeight;
+extern int iWidth;
 
 //The vertex Structure
-struct Vertex
-{
-	DirectX::XMFLOAT3 pos;
-	DirectX::XMFLOAT3 normal;
-};
+
 
 Graphics::Graphics(HWND hwnd, int width, int height, bool windowed)
 {
@@ -22,7 +19,7 @@ Graphics::Graphics(HWND hwnd, int width, int height, bool windowed)
 
 	swapChainBufferDesc.Width = 0;
 	swapChainBufferDesc.Height = 0;
-	swapChainBufferDesc.RefreshRate.Numerator = 60;
+	swapChainBufferDesc.RefreshRate.Numerator = 120;
 	swapChainBufferDesc.RefreshRate.Denominator = 1;
 	swapChainBufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
 	swapChainBufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
@@ -33,7 +30,7 @@ Graphics::Graphics(HWND hwnd, int width, int height, bool windowed)
 	ZeroMemory(&swapChainDesc, sizeof(DXGI_SWAP_CHAIN_DESC));
 
 	swapChainDesc.BufferDesc = swapChainBufferDesc;
-	swapChainDesc.SampleDesc.Count = 16;
+	swapChainDesc.SampleDesc.Count = 8;
 	swapChainDesc.SampleDesc.Quality = 0;
 	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	swapChainDesc.BufferCount = 1;
@@ -81,7 +78,7 @@ Graphics::Graphics(HWND hwnd, int width, int height, bool windowed)
 	depthStencilDesc.MipLevels = 1;
 	depthStencilDesc.ArraySize = 1;
 	depthStencilDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	depthStencilDesc.SampleDesc.Count = 16;
+	depthStencilDesc.SampleDesc.Count = 8;
 	depthStencilDesc.SampleDesc.Quality = 0;
 	depthStencilDesc.Usage = D3D11_USAGE_DEFAULT;
 	depthStencilDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
@@ -411,7 +408,7 @@ void Graphics::setCBuffer(float rotation, char number)
 		cb =
 		{
 			XMMatrixTranspose(XMMatrixScaling(0.5f, 0.5f, 0.5f) * XMMatrixRotationRollPitchYaw(0.0f, rotation / 2.0f, 0.0f) * XMMatrixTranslation(0.0f, 0.0f, 2.0f)),
-			XMMatrixTranspose(XMMatrixScaling(0.5f, 0.5f, 0.5f) * XMMatrixRotationRollPitchYaw(0.0f, rotation / 2.0f, 0.0f) * XMMatrixTranslation(0.0f, 0.0f, 2.0f) * XMMatrixPerspectiveLH(0.4f * 3.14f, 9.0f / 16.0f, 0.5f, 10.0f))
+			XMMatrixTranspose(XMMatrixScaling(0.5f, 0.5f, 0.5f) * XMMatrixRotationRollPitchYaw(0.0f, rotation / 2.0f, 0.0f) * XMMatrixTranslation(0.0f, 0.0f, 2.0f) * XMMatrixPerspectiveLH(0.4f * 3.14f, (float)iHeight / (float)iWidth, 0.5f, 10.0f))
 		};
 	}
 	
@@ -420,7 +417,7 @@ void Graphics::setCBuffer(float rotation, char number)
 		cb =
 		{
 			XMMatrixTranspose(XMMatrixScaling(0.5f, 0.5f, 0.5f) * XMMatrixRotationRollPitchYaw(0.0f, rotation / 2.0f, 0.0f) * XMMatrixTranslation(1.0f, 0.0f, 2.0f)),
-			XMMatrixTranspose(XMMatrixScaling(0.5f, 0.5f, 0.5f) * XMMatrixRotationRollPitchYaw(0.0f, rotation / 2.0f, 0.0f) * XMMatrixTranslation(1.0f, 0.0f, 2.0f) * XMMatrixPerspectiveLH(0.4f * 3.14f, 9.0f / 16.0f, 0.5f, 10.0f))
+			XMMatrixTranspose(XMMatrixScaling(0.5f, 0.5f, 0.5f) * XMMatrixRotationRollPitchYaw(0.0f, rotation / 2.0f, 0.0f) * XMMatrixTranslation(1.0f, 0.0f, 2.0f) * XMMatrixPerspectiveLH(0.4f * 3.14f, (float)iHeight / (float)iWidth, 0.5f, 10.0f))
 		};
 	}
 

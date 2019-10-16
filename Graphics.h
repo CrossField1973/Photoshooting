@@ -1,5 +1,4 @@
 #pragma once
-#include <wrl.h>
 #include <d3d11.h>
 #pragma comment(lib, "d3d11.lib")
 
@@ -19,6 +18,7 @@ public:
 	void setCube(char number);
 	void setCBuffer(float rotation, char number);
 	void moveLight(float xTransform);
+
 private:
 	IDXGISwapChain* pSwapChain = nullptr;
 	ID3D11Device* pDevice = nullptr;
@@ -35,3 +35,8 @@ private:
 	float clearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
 };
 
+struct Vertex
+{
+	DirectX::XMFLOAT3 pos;
+	DirectX::XMFLOAT3 normal;
+};
