@@ -1,9 +1,10 @@
 #include "Graphics.h"
+<<<<<<< HEAD
+=======
 #include <d3dcompiler.h>
+>>>>>>> 7ea4a51a859acda2bcb04159f053fbe06d3ff73e
 #include <cassert>
 #include <vector>
-
-#pragma comment(lib, "D3DCompiler.lib")
 
 extern int iHeight;
 extern int iWidth;
@@ -133,11 +134,6 @@ void Graphics::cleanUp()
 	if (cubeVertexBuffer1)
 	{
 		cubeVertexBuffer1->Release();
-	}
-
-	if (cubeVertexBuffer2)
-	{
-		cubeVertexBuffer2->Release();
 	}
 }
 
@@ -286,15 +282,7 @@ void Graphics::initCube(char bufferNumber)
 	cubeBufferDesc.CPUAccessFlags = 0;
 	cubeBufferDesc.MiscFlags = 0;
 
-	if (bufferNumber == '1')
-	{
-		pDevice->CreateBuffer(&cubeBufferDesc, &cubeBufferData, &cubeVertexBuffer1);
-	}
-
-	if (bufferNumber == '2')
-	{
-		pDevice->CreateBuffer(&cubeBufferDesc, &cubeBufferData, &cubeVertexBuffer2);
-	}
+	pDevice->CreateBuffer(&cubeBufferDesc, &cubeBufferData, &cubeVertexBuffer1);
 
 	D3D11_BUFFER_DESC indexBufferDesc;
 	ZeroMemory(&indexBufferDesc, sizeof(D3D11_BUFFER_DESC));
@@ -373,18 +361,11 @@ void Graphics::endDraw()
 	pSwapChain->Present(0, 0);
 }
 
-void Graphics::setCube(char number)
+void Graphics::setCube()
 {
 	UINT stride = sizeof(Vertex);
 	UINT offset = 0;
-	if (number == '1')
-	{
-		pContext->IASetVertexBuffers(0, 1, &cubeVertexBuffer1, &stride, &offset);
-	}
-	else
-	{
-		pContext->IASetVertexBuffers(0, 1, &cubeVertexBuffer2, &stride, &offset);
-	}
+	pContext->IASetVertexBuffers(0, 1, &cubeVertexBuffer1, &stride, &offset);
 }
 
 void Graphics::setCBuffer(float rotation, char number)
@@ -403,8 +384,8 @@ void Graphics::setCBuffer(float rotation, char number)
 	{
 		cb =
 		{
-			XMMatrixTranspose(XMMatrixScaling(0.5f, 0.5f, 0.5f) * XMMatrixRotationRollPitchYaw(0.0f, rotation / 2.0f, 0.0f) * XMMatrixTranslation(0.0f, 0.0f, 2.0f)),
-			XMMatrixTranspose(XMMatrixScaling(0.5f, 0.5f, 0.5f) * XMMatrixRotationRollPitchYaw(0.0f, rotation / 2.0f, 0.0f) * XMMatrixTranslation(0.0f, 0.0f, 2.0f) * XMMatrixPerspectiveLH(0.4f * 3.14f, (float)iHeight / (float)iWidth, 0.5f, 10.0f))
+			XMMatrixTranspose(XMMatrixScaling(0.5f, 0.5f, 0.5f) * XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f) * XMMatrixTranslation(0.0f, 0.0f, 2.0f + 0.3f * sin(rotation))),
+			XMMatrixTranspose(XMMatrixScaling(0.5f, 0.5f, 0.5f) * XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f) * XMMatrixTranslation(0.0f, 0.0f, 2.0f + 0.3f * sin(rotation)) * XMMatrixPerspectiveLH(0.4f * 3.14f, (float)iHeight / (float)iWidth, 0.5f, 10.0f))
 		};
 	}
 	
@@ -414,6 +395,33 @@ void Graphics::setCBuffer(float rotation, char number)
 		{
 			XMMatrixTranspose(XMMatrixScaling(0.5f, 0.5f, 0.5f) * XMMatrixRotationRollPitchYaw(0.0f, rotation / 2.0f, 0.0f) * XMMatrixTranslation(1.0f, 0.0f, 2.0f)),
 			XMMatrixTranspose(XMMatrixScaling(0.5f, 0.5f, 0.5f) * XMMatrixRotationRollPitchYaw(0.0f, rotation / 2.0f, 0.0f) * XMMatrixTranslation(1.0f, 0.0f, 2.0f) * XMMatrixPerspectiveLH(0.4f * 3.14f, (float)iHeight / (float)iWidth, 0.5f, 10.0f))
+		};
+	}
+
+	else if (number == '3')
+	{
+		cb =
+		{
+			XMMatrixTranspose(XMMatrixScaling(0.5f, 0.5f, 0.5f) * XMMatrixRotationRollPitchYaw(0.0f, -rotation / 2.0f + 1, 0.0f) * XMMatrixTranslation(-1.0f, 0.0f, 2.0f)),
+			XMMatrixTranspose(XMMatrixScaling(0.5f, 0.5f, 0.5f) * XMMatrixRotationRollPitchYaw(0.0f, -rotation / 2.0f + 1, 0.0f) * XMMatrixTranslation(-1.0f, 0.0f, 2.0f) * XMMatrixPerspectiveLH(0.4f * 3.14f, (float)iHeight / (float)iWidth, 0.5f, 10.0f))
+		};
+	}
+
+	else if (number == '4')
+	{
+		cb =
+		{
+			XMMatrixTranspose(XMMatrixScaling(0.5f, 0.5f, 0.5f) * XMMatrixRotationRollPitchYaw(-rotation / 2.0f + 2.0f, 0.0f, 0.0f) * XMMatrixTranslation(0.0f, 1.0f, 2.0f)),
+			XMMatrixTranspose(XMMatrixScaling(0.5f, 0.5f, 0.5f) * XMMatrixRotationRollPitchYaw(-rotation / 2.0f + 2.0f, 0.0f, 0.0f) * XMMatrixTranslation(0.0f, 1.0f, 2.0f) * XMMatrixPerspectiveLH(0.4f * 3.14f, (float)iHeight / (float)iWidth, 0.5f, 10.0f))
+		};
+	}
+
+	else if (number == '5')
+	{
+		cb =
+		{
+			XMMatrixTranspose(XMMatrixScaling(0.5f, 0.5f, 0.5f) * XMMatrixRotationRollPitchYaw(rotation / 2.0f + 3, 0.0f, 0.0f) * XMMatrixTranslation(0.0f, -1.0f, 2.0f)),
+			XMMatrixTranspose(XMMatrixScaling(0.5f, 0.5f, 0.5f) * XMMatrixRotationRollPitchYaw(rotation / 2.0f + 3, 0.0f, 0.0f) * XMMatrixTranslation(0.0f, -1.0f, 2.0f) * XMMatrixPerspectiveLH(0.4f * 3.14f, (float)iHeight / (float)iWidth, 0.5f, 10.0f))
 		};
 	}
 
@@ -466,9 +474,20 @@ void Graphics::moveLight(float xTransform)
 	cbL->Release();
 }
 
+<<<<<<< HEAD
+ID3D11Device* Graphics::getDevice()
+{
+	return pDevice;
+}
+
+ID3D11DeviceContext* Graphics::getContext()
+{
+	return pContext;
+=======
 void Graphics::debugReportLiveObject()
 {
 	pDevice->QueryInterface(IID_PPV_ARGS(&debug));
 	debug->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
 	debug->Release();
+>>>>>>> 7ea4a51a859acda2bcb04159f053fbe06d3ff73e
 }
