@@ -3,8 +3,8 @@
 #include <fstream>
 #include <string>
 
-int iWidth = 2520;
-int iHeight = 1080;
+int iWidth = 1280;
+int iHeight = 720;
 LPCTSTR sWndClassName = L"normalWindow";
 HWND hHwnd = NULL;
 MSG mMsg;
@@ -94,7 +94,7 @@ bool InitMainWindow(HINSTANCE hInstance, int nCmdShow, bool windowed)
 	return true;
 }
 
-void messageLoop(Graphics& graphics)
+void messageLoop(Graphics& graphics, Sphere& sphere)
 {
 	ZeroMemory(&mMsg, sizeof(MSG));
 	while (true)
@@ -110,21 +110,32 @@ void messageLoop(Graphics& graphics)
 			TranslateMessage(&mMsg);
 			DispatchMessage(&mMsg);
 		}
- 
+
 		//Run Game Code
 		else
 		{
-			static float rot = 0.0f;
+			const float delta = 0.001f;
+
+			graphics.startDraw();
+			sphere.draw();
+			sphere.rotate(delta, 0.0f, 0.0f);
+			sphere.move(0.0f, 0.0f, -delta / 10);
+
+			/*static float rot = 0.0f;
 			graphics.moveLight(rot);
 			graphics.startDraw();
-			graphics.setCube('1');
-			graphics.setCBuffer(rot, '1');
-			graphics.drawCube();
-			graphics.setCube('2');
+			graphics.setCube();
 			graphics.setCBuffer(rot, '2');
 			graphics.drawCube();
+			graphics.setCBuffer(rot, '3');
+			graphics.drawCube();
+			graphics.setCBuffer(rot, '4');
+			graphics.drawCube();
+			graphics.setCBuffer(rot, '5');
+			graphics.drawCube();
 			graphics.endDraw();
-			rot += 0.0001;
+			rot += 0.01;*/
+			graphics.endDraw();
 		}
 	}
 	graphics.cleanUp();
