@@ -13,23 +13,20 @@ public:
 	void rotate(float x, float y, float z);
 	void scale(float x, float y, float z);
 
-	struct cBufferMatrix
-	{
-		DirectX::XMMATRIX model;
-		DirectX::XMMATRIX modelViewProj;
-	};
-
 private:
-	ID3D11Buffer* vertexBuffer;
-	ID3D11Buffer* indexBuffer;
-	ID3D11InputLayout* inputLayout;
-	ID3D11Buffer* modelViewProj;
-	ID3D11Device* device;
-	ID3D11DeviceContext* context;
+	ID3D11Buffer* vertexBuffer = nullptr;
+	ID3D11Buffer* indexBuffer = nullptr;
+	ID3D11InputLayout* inputLayout = nullptr;
+	ID3D11Buffer* modelViewProj = nullptr;
+	ID3D11Device* device = nullptr;
+	ID3D11DeviceContext* context = nullptr;
 	cBufferMatrix cb;
-	DirectX::XMFLOAT3 position = {0.0f, 0.0f, 2.0f};
+	ID3D11VertexShader* vs = nullptr;
+	ID3D11PixelShader* ps = nullptr;
+	ID3D11Debug* debug = nullptr;
+	DirectX::XMFLOAT3 position = {0.0f, 0.0f, 0.0f};
 	DirectX::XMFLOAT3 rotation = { 0.0f, 0.0f, 0.0f };
-	DirectX::XMFLOAT3 scaling = {0.7f, 0.7f, 0.7f};
+	DirectX::XMFLOAT3 scaling = {1.0f, 1.0f, 1.0f};
 	UINT numIndices;
 };
 

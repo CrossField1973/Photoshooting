@@ -2,6 +2,7 @@
 #include "Graphics.h"
 #include <fstream>
 #include <string>
+#include <math.h>
 
 int iWidth = 1280;
 int iHeight = 720;
@@ -94,7 +95,7 @@ bool InitMainWindow(HINSTANCE hInstance, int nCmdShow, bool windowed)
 	return true;
 }
 
-void messageLoop(Graphics& graphics, Sphere& sphere)
+void messageLoop(Graphics& graphics, Sphere& sphere, Cube& cube)
 {
 	ZeroMemory(&mMsg, sizeof(MSG));
 	while (true)
@@ -114,32 +115,36 @@ void messageLoop(Graphics& graphics, Sphere& sphere)
 		//Run Game Code
 		else
 		{
-			const float delta = 0.001f;
+			static float delta = DirectX::XM_PI / 360.0f;
+			static float degree = 0.0f;
 
 			graphics.startDraw();
+
+			graphics.moveLight(0.0f, 0.0f, 1.8f * std::sin(degree) + 2.5f);
+			sphere.move(0.0f, 0.0f, 1.8f * std::sin(degree) + 2.5f);
+
+			cube.move(-1.0f, 0.0f, 0.0f);
+			cube.draw();
+
+			cube.move(2.0f, 0.0f, 0.0f);
+			cube.draw();
+
+			cube.move(-1.0f, 1.0f, 0.0f);
+			cube.draw();
+
+			cube.move(0.0f, -2.0f, 0.0f);
+			cube.draw();
+
+			cube.move(0.0f, 1.0f, 0.0f);
+			cube.rotate(delta, 0.0f, 0.0f);
+
 			sphere.draw();
-			sphere.rotate(delta, 0.0f, 0.0f);
-			sphere.move(0.0f, 0.0f, -delta / 10);
 
-			/*static float rot = 0.0f;
-			graphics.moveLight(rot);
-			graphics.startDraw();
-			graphics.setCube();
-			graphics.setCBuffer(rot, '2');
-			graphics.drawCube();
-			graphics.setCBuffer(rot, '3');
-			graphics.drawCube();
-			graphics.setCBuffer(rot, '4');
-			graphics.drawCube();
-			graphics.setCBuffer(rot, '5');
-			graphics.drawCube();
 			graphics.endDraw();
-			rot += 0.01;*/
-			graphics.endDraw();
+
+			degree += 0.005;
 		}
 	}
-	graphics.cleanUp();
-	graphics.debugReportLiveObject();
 }
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)

@@ -2,6 +2,8 @@
 
 extern int iWidth;
 extern int iHeight;
+extern float FoV;
+extern float aspectRatio;
 
 using namespace DirectX;
 
@@ -13,6 +15,9 @@ Sphere::Sphere(Graphics& graphics, int latDiv, int longDiv)
 	ZeroMemory(&modelViewProj, sizeof(modelViewProj));
 	ZeroMemory(&device, sizeof(device));
 	ZeroMemory(&context, sizeof(context));
+	ZeroMemory(&vs, sizeof(vs));
+	ZeroMemory(&ps, sizeof(ps));
+	ZeroMemory(&debug, sizeof(debug));
 
 	device = graphics.getDevice();
 	graphics.getDevice()->AddRef();
@@ -123,7 +128,12 @@ Sphere::Sphere(Graphics& graphics, int latDiv, int longDiv)
 	device->CreateBuffer(&indexBufferDesc, &indexBufferData, &indexBuffer);
 
 	ID3DBlob* blob = nullptr;
-	D3DReadFileToBlob(L"VertexShader.cso", &blob);
+	D3DReadFileToBlob(L"PixelShaderSphere.cso", &blob);
+	device->CreatePixelShader(blob->GetBufferPointer(), blob->GetBufferSize(), nullptr, &ps);
+	blob->Release();
+
+	D3DReadFileToBlob(L"VertexShaderSphere.cso", &blob);
+	device->CreateVertexShader(blob->GetBufferPointer(), blob->GetBufferSize(), nullptr, &vs);
 
 	static D3D11_INPUT_ELEMENT_DESC layout[] =
 	{
@@ -138,10 +148,13 @@ Sphere::Sphere(Graphics& graphics, int latDiv, int longDiv)
 
 	numIndices = indices.size();
 
+	XMVECTOR Eye = XMVectorSet(0.0f, 3.0f, -6.0f, 0.0f);
+	XMVECTOR At = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+	XMVECTOR Up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 	cb =
 	{
-		XMMatrixTranspose(XMMatrixScaling(scaling.x, scaling.y, scaling.z) * XMMatrixRotationRollPitchYaw(rotation.x, rotation.y, rotation.z) * XMMatrixTranslation(position.x, position.y, position.z)),
-		XMMatrixTranspose(XMMatrixScaling(scaling.x, scaling.y, scaling.z) * XMMatrixRotationRollPitchYaw(rotation.x, rotation.y, rotation.z) * XMMatrixTranslation(position.x, position.y, position.z) * XMMatrixPerspectiveLH(0.4f * 3.14f, (float)iHeight / (float)iWidth, 0.5f, 10.0f))
+		XMMatrixTranspose(XMMatrixScaling(scaling.x, scaling.y, scaling.z) * XMMatrixRotationRollPitchYaw(rotation.x, rotation.y, rotation.z) * XMMatrixTranslation(position.x, position.y, position.z) * XMMatrixLookAtLH(Eye, At, Up)),
+		XMMatrixTranspose(XMMatrixScaling(scaling.x, scaling.y, scaling.z) * XMMatrixRotationRollPitchYaw(rotation.x, rotation.y, rotation.z) * XMMatrixTranslation(position.x, position.y, position.z) * XMMatrixLookAtLH(Eye, At, Up) * XMMatrixPerspectiveLH(FoV, aspectRatio, 0.5f, 10.0f))
 	};
 
 	D3D11_BUFFER_DESC constBufferDesc;
@@ -156,6 +169,7 @@ Sphere::Sphere(Graphics& graphics, int latDiv, int longDiv)
 	srd.pSysMem = &cb;
 	device->CreateBuffer(&constBufferDesc, &srd, &modelViewProj);
 
+	device->QueryInterface(IID_PPV_ARGS(&debug));
 }
 
 Sphere::~Sphere()
@@ -164,8 +178,13 @@ Sphere::~Sphere()
 	indexBuffer->Release();
 	modelViewProj->Release();
 	inputLayout->Release();
+	vs->Release();
+	ps->Release();
 	device->Release();
 	context->Release();
+	
+	debug->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
+	debug->Release();
 }
 
 void Sphere::reset()
@@ -192,20 +211,23 @@ void Sphere::draw()
 	context->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
 	context->VSSetConstantBuffers(0, 1, &modelViewProj);
+
+	context->VSSetShader(vs, nullptr, 0);
+	context->PSSetShader(ps, nullptr, 0);
 	
 	context->DrawIndexed(numIndices, 0, 0);
 }
 
 void Sphere::move(float x, float y, float z)
 {
-	position.x += x;
-	position.y += y;
-	position.z += z;
+	position.x = x;
+	position.y = y;
+	position.z = z;
 
 	cb =
 	{
 		XMMatrixTranspose(XMMatrixScaling(scaling.x, scaling.y, scaling.z) * XMMatrixRotationRollPitchYaw(rotation.x, rotation.y, rotation.z) * XMMatrixTranslation(position.x, position.y, position.z)),
-		XMMatrixTranspose(XMMatrixScaling(scaling.x, scaling.y, scaling.z) * XMMatrixRotationRollPitchYaw(rotation.x, rotation.y, rotation.z) * XMMatrixTranslation(position.x, position.y, position.z) * XMMatrixPerspectiveLH(0.4f * 3.14f, (float)iHeight / (float)iWidth, 0.5f, 10.0f))
+		XMMatrixTranspose(XMMatrixScaling(scaling.x, scaling.y, scaling.z) * XMMatrixRotationRollPitchYaw(rotation.x, rotation.y, rotation.z) * XMMatrixTranslation(position.x, position.y, position.z) * XMMatrixPerspectiveLH(FoV, aspectRatio, 0.5f, 10.0f))
 	};
 	context->UpdateSubresource(modelViewProj, 0, 0, &cb, 0, 0);
 }
@@ -219,7 +241,7 @@ void Sphere::rotate(float x, float y, float z)
 	cb =
 	{
 		XMMatrixTranspose(XMMatrixScaling(scaling.x, scaling.y, scaling.z) * XMMatrixRotationRollPitchYaw(rotation.x, rotation.y, rotation.z) * XMMatrixTranslation(position.x, position.y, position.z)),
-		XMMatrixTranspose(XMMatrixScaling(scaling.x, scaling.y, scaling.z) * XMMatrixRotationRollPitchYaw(rotation.x, rotation.y, rotation.z) * XMMatrixTranslation(position.x, position.y, position.z) * XMMatrixPerspectiveLH(0.4f * 3.14f, (float)iHeight / (float)iWidth, 0.5f, 10.0f))
+		XMMatrixTranspose(XMMatrixScaling(scaling.x, scaling.y, scaling.z) * XMMatrixRotationRollPitchYaw(rotation.x, rotation.y, rotation.z) * XMMatrixTranslation(position.x, position.y, position.z) * XMMatrixPerspectiveLH(FoV, aspectRatio, 0.5f, 10.0f))
 	};
 	context->UpdateSubresource(modelViewProj, 0, 0, &cb, 0, 0);
 }
@@ -233,7 +255,7 @@ void Sphere::scale(float x, float y, float z)
 	cb =
 	{
 		XMMatrixTranspose(XMMatrixScaling(scaling.x, scaling.y, scaling.z) * XMMatrixRotationRollPitchYaw(rotation.x, rotation.y, rotation.z) * XMMatrixTranslation(position.x, position.y, position.z)),
-		XMMatrixTranspose(XMMatrixScaling(scaling.x, scaling.y, scaling.z) * XMMatrixRotationRollPitchYaw(rotation.x, rotation.y, rotation.z) * XMMatrixTranslation(position.x, position.y, position.z) * XMMatrixPerspectiveLH(0.4f * 3.14f, (float)iHeight / (float)iWidth, 0.5f, 10.0f))
+		XMMatrixTranspose(XMMatrixScaling(scaling.x, scaling.y, scaling.z) * XMMatrixRotationRollPitchYaw(rotation.x, rotation.y, rotation.z) * XMMatrixTranslation(position.x, position.y, position.z) * XMMatrixPerspectiveLH(FoV, aspectRatio, 0.5f, 10.0f))
 	};
 	context->UpdateSubresource(modelViewProj, 0, 0, &cb, 0, 0);
 }
